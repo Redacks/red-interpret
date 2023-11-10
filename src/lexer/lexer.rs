@@ -12,17 +12,24 @@ impl Lexer {
     }
 
     fn get_preprocess_input(&self) -> Vec<String> {
-        let global_var_pattern = Regex::new(r"(\$[_a-zA-Z][_a-zA-Z0-9]*\$)").unwrap(); //Used to fix spacing around variable
+        let global_var_pattern = Regex::new(r"(= )?(\$[_a-zA-Z][_a-zA-Z0-9]*\$)(\s*\n)?").unwrap(); //Used to fix spacing around variable
         let new_line_separator = Regex::new(r"\n").unwrap(); //Used to split by line
 
-        global_var_pattern
-            .replace_all(
-                &new_line_separator.replace_all(self.input.trim_end_matches("\n"), " \n "),
-                " $1 ",
-            )
-            .split(" ")
-            .map(|x| x.to_owned())
-            .collect()
+        let mut splitting_newlines = new_line_separator
+            .replace_all(self.input.trim_end_matches("\n"), " \n ")
+            .to_string();
+        splitting_newlines.push_str(" \n");
+
+        let result =
+            global_var_pattern.replace_all(&splitting_newlines, |caps: &regex::Captures| {
+                if caps.get(1).is_some() && caps.get(2).is_some() && caps.get(3).is_some() {
+                    println!("{:?}", caps);
+                    (caps[0].trim().to_string() + " \n").to_string()
+                } else {
+                    format!(" {} ", caps.get(2).unwrap().as_str())
+                }
+            });
+        result.split(" ").map(|x| x.to_owned()).collect()
     }
 
     pub fn lex(&self) -> Vec<Token> {
@@ -41,13 +48,13 @@ impl Lexer {
                     "Text" => Token::new(current_line, TokenType::TEXT),
                     "Input" => Token::new(current_line, TokenType::INPUT),
                     "Output" => Token::new(current_line, TokenType::OUTPUT),
-                    _ => Token::new(current_line, TokenType::INVALID),
+                    _ => Token::new(current_line, TokenType::INVALID(token)),
                 },
                 TokenType::INPUT | TokenType::OUTPUT | TokenType::TEXT | TokenType::ZAHL => {
                     if identifier_pattern.is_match(token.as_str()) {
                         Token::new(current_line, TokenType::IDENTIFIER(token))
                     } else {
-                        Token::new(current_line, TokenType::INVALID)
+                        Token::new(current_line, TokenType::INVALID(token))
                     }
                 }
                 TokenType::IDENTIFIER(_) => {

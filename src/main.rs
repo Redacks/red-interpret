@@ -27,7 +27,7 @@ fn main() {
 
     task_stopwatch.start();
     let lexed = Lexer::new(file_content).lex();
-    println!("{:?}", lexed.clone());
+    //println!("{:?}", lexed.clone());
     task_stopwatch.stop("Lexing");
 
     task_stopwatch.start();

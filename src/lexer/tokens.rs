@@ -8,7 +8,7 @@ pub enum TokenType {
     INPUT,
     IDENTIFIER(String),
     NEWLINE,
-    INVALID,
+    INVALID(String),
 }
 
 #[derive(Clone, Debug)]

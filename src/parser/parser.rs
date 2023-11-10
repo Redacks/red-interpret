@@ -103,7 +103,7 @@ impl Parser {
         let identifier = self.try_get_identifier()?;
 
         self.next_token();
-        if self.is_assignment()? {
+        if self.is_assignment(line)? {
             self.next_token();
             let value_exp = self.try_get_string_value()?;
 
@@ -124,7 +124,7 @@ impl Parser {
         let identifier = self.try_get_identifier()?;
         self.next_token();
 
-        if self.is_assignment()? {
+        if self.is_assignment(line)? {
             self.next_token();
             let value_exp = self.try_get_number_value()?;
 
@@ -142,16 +142,16 @@ impl Parser {
         let token = self.get_current_token()?;
         match token.token_type {
             TokenType::IDENTIFIER(identifier) => Ok(identifier),
-            _ => Err(format!("Expected identifier")),
+            _ => Err(format!("Expected identifier on line {}", token.line)),
         }
     }
 
-    fn is_assignment(&self) -> Result<bool, String> {
+    fn is_assignment(&self, line: usize) -> Result<bool, String> {
         let token = self.get_current_token()?;
         match token.token_type {
             TokenType::EQUAL => Ok(true),
             TokenType::NEWLINE => Ok(false),
-            _ => Err(format!("Invalid assignment on line ")),
+            _ => Err(format!("Invalid assignment on line {}", line)),
         }
     }
 
