@@ -17,10 +17,13 @@ impl StopWatch {
         match self.start_time {
             Some(start) => {
                 let duration = start.elapsed();
-                if duration.as_millis() == 0 {
-                    println!("Task '{}' took {} µs", task_name, duration.as_micros());
-                } else {
-                    println!("Task '{}' took {} ms", task_name, duration.as_millis());
+
+                if cfg!(debug_assertions) {
+                    if duration.as_millis() == 0 {
+                        println!("Task '{}' took {} µs", task_name, duration.as_micros());
+                    } else {
+                        println!("Task '{}' took {} ms", task_name, duration.as_millis());
+                    }
                 }
             }
             None => {

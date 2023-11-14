@@ -32,7 +32,11 @@ impl Lexer {
                     println!("{:?}", caps);
                     (caps[0].trim().to_string() + " \n").to_string()
                 } else {
-                    format!(" {} ", caps.get(2).unwrap().as_str())
+                    if caps.get(3).is_some() {
+                        format!(" {} \n", caps.get(2).unwrap().as_str())
+                    } else {
+                        format!(" {} ", caps.get(2).unwrap().as_str())
+                    }
                 }
             });
         result.split(" ").map(|x| x.to_owned()).collect()
