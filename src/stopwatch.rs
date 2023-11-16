@@ -2,11 +2,15 @@ use std::time::Instant;
 
 pub struct StopWatch {
     start_time: Option<Instant>,
+    active: bool,
 }
 
 impl StopWatch {
-    pub fn new() -> Self {
-        Self { start_time: None }
+    pub fn new(active: bool) -> Self {
+        Self {
+            start_time: None,
+            active,
+        }
     }
 
     pub fn start(&mut self) {
@@ -18,7 +22,7 @@ impl StopWatch {
             Some(start) => {
                 let duration = start.elapsed();
 
-                if cfg!(debug_assertions) {
+                if self.active {
                     if duration.as_millis() == 0 {
                         println!("Task '{}' took {} µs", task_name, duration.as_micros());
                     } else {
