@@ -13,7 +13,7 @@ mod parser;
 mod stopwatch;
 
 fn main() {
-    let mut task_stopwatch = StopWatch::new(true);
+    let mut task_stopwatch = StopWatch::new(false);
     let mut overall_stopwatch = StopWatch::new(true);
 
     overall_stopwatch.start();
@@ -27,6 +27,7 @@ fn main() {
 
     task_stopwatch.start();
     file_content = file_content.replace("\r", "");
+    file_content.push('\n');
     let mut lexer = Lexer::new(&file_content);
     let lexed = lexer.lex().unwrap_or_else(|err| {
         err.print_error(&file_content);

@@ -88,8 +88,8 @@ impl Interpreter {
                 } else {
                     Err(CodeError::new(
                         expr.line,
-                        expr.start,
-                        expr.end,
+                        var_expr.start,
+                        var_expr.end,
                         format!(
                             "Could not convert Text variable {} to number!",
                             var_expr.var_name

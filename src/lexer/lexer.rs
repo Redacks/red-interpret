@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::error::CodeError;
 
 use super::{Token, TokenType};
@@ -11,7 +13,7 @@ pub struct Lexer {
 }
 
 impl Lexer {
-    pub fn new(input: &String) -> Self {
+    pub fn new(input: &str) -> Self {
         Lexer {
             input: input.to_owned(),
             current: 0,
@@ -26,53 +28,36 @@ impl Lexer {
             self.op_token()?;
             while !self.is_at_end() {
                 self.start = self.current;
-                self.scan_token()?
+                self.scan_token()?;
             }
             self.add_token(TokenType::EOF);
-            Ok(self.tokens.clone())
-        } else {
-            Ok(self.tokens.clone()) //Empty
         }
+        Ok(self.tokens.to_owned())
     }
 
     fn scan_token(&mut self) -> Result<(), CodeError> {
         match self.tokens.last().unwrap().token_type {
-            TokenType::NEWLINE => {
-                match self.advance()? {
-                    '\n' => {
-                        self.add_token(TokenType::NEWLINE);
-                        self.line += 1;
-                        self.start = self.current;
-                    }
-                    ' ' => {
-                        self.start = self.current;
-                    }
-                    _ => {
-                        self.current -= 1;
-                    }
-                }
-                self.op_token()?;
-                Ok(())
-            }
+            TokenType::NEWLINE => self.op_token()?,
             _ => match self.advance()? {
                 '\n' => {
                     self.add_token(TokenType::NEWLINE);
                     self.line += 1;
                     self.start = self.current;
-                    Ok(())
                 }
                 ' ' => {
                     self.start = self.current;
-                    Ok(())
                 }
-                _ => Err(CodeError::new(
-                    self.line,
-                    self.start,
-                    self.current,
-                    "Unknown token at this position!",
-                )),
+                _ => {
+                    return Err(CodeError::new(
+                        self.line,
+                        self.start,
+                        self.current,
+                        "Unknown token at this position!",
+                    ))
+                }
             },
         }
+        Ok(())
     }
 
     fn identifier_token(&mut self) -> Result<(), CodeError> {
@@ -138,11 +123,41 @@ impl Lexer {
     fn number_token(&mut self) -> Result<(), CodeError> {
         self.skip_spaces()?;
         let mut ch = self.advance()?;
-        while ch.is_digit(10) {
-            ch = self.advance()?;
+
+        if ch.is_digit(10) {
+            // Numeric value handling
+            while ch.is_digit(10) {
+                ch = self.advance()?;
+            }
+            self.current -= 1;
+            self.add_token(TokenType::VALUE);
+        } else if ch == '$' {
+            self.start = self.current;
+            self.identifier_token()?;
+            if !self.match_next('$')? {
+                return Err(CodeError::new(
+                    self.line,
+                    self.start,
+                    self.current,
+                    "Expected closing $ for variable",
+                ));
+            } else if self.match_next('$')? {
+                return Err(CodeError::new(
+                    self.line,
+                    self.start,
+                    self.current,
+                    "Found $$ but expected $ because of present variable",
+                ));
+            }
+        } else {
+            return Err(CodeError::new(
+                self.line,
+                self.start,
+                self.current,
+                "Expected digit or variable in number token",
+            ));
         }
-        self.current -= 1;
-        self.add_token(TokenType::VALUE);
+
         Ok(())
     }
 
@@ -163,7 +178,10 @@ impl Lexer {
 
     fn op_token(&mut self) -> Result<(), CodeError> {
         self.skip_spaces()?;
-        match self.advance_space()?.as_str() {
+        if self.is_at_end() {
+            return Ok(());
+        }
+        match self.advance_space()?.as_ref() {
             "Zahl" => {
                 self.add_token(TokenType::ZAHL);
                 self.identifier_token()?;
@@ -209,17 +227,12 @@ impl Lexer {
     }
 
     fn add_token(&mut self, token_type: TokenType) {
-        let slice: String = self
-            .input
-            .chars()
-            .skip(self.start)
-            .take(self.current - self.start)
-            .collect();
+        let slice = &self.input[self.start..self.current];
         self.tokens.push(Token::new(
             self.line,
             self.start,
             self.current,
-            slice,
+            slice.to_owned(),
             token_type,
         ));
         self.start = self.current;
@@ -240,29 +253,38 @@ impl Lexer {
                 self.line,
                 self.start,
                 self.current,
-                "EOF reached to early!",
+                "EOF reached too early!",
             ))
         }
     }
 
     fn skip_spaces(&mut self) -> Result<(), CodeError> {
+        if self.is_at_end() {
+            return Ok(());
+        }
         let mut ch = self.advance()?;
-        while ch == ' ' {
+        while ch.is_whitespace() && !self.is_at_end() {
+            if ch == '\n' {
+                self.add_token(TokenType::NEWLINE);
+                self.line += 1;
+            }
             ch = self.advance()?;
         }
-        self.current -= 1;
-        self.start = self.current;
+        if !self.is_at_end() {
+            self.current -= 1;
+            self.start = self.current;
+        }
         Ok(())
     }
 
-    fn advance_space(&mut self) -> Result<String, CodeError> {
-        let mut result: String = String::new();
-        let mut char = self.advance()?;
-        while char != ' ' {
-            result.push(char);
-            char = self.advance()?;
+    fn advance_space(&mut self) -> Result<Cow<str>, CodeError> {
+        while let Ok(char) = self.advance() {
+            if char == ' ' {
+                break;
+            }
         }
-        Ok(result)
+        let slice = &self.input[self.start..self.current - 1];
+        Ok(slice.into())
     }
 
     fn get_char_at_current(&self) -> Result<char, CodeError> {
@@ -273,18 +295,18 @@ impl Lexer {
                 self.line,
                 self.start,
                 self.current,
-                "Error while parsing line!",
+                "Error while parsing line! EOL",
             ))
         }
     }
 
     fn advance(&mut self) -> Result<char, CodeError> {
-        let char = self.get_char_at_current();
+        let char = self.get_char_at_current()?;
         self.current += 1;
-        char
+        Ok(char)
     }
 
     fn is_at_end(&self) -> bool {
-        return self.current >= self.input.len();
+        self.current >= self.input.len()
     }
 }

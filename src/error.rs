@@ -19,24 +19,23 @@ impl CodeError {
     pub fn print_error(&self, input: &String) {
         let lines: Vec<&str> = input.split("\n").collect();
         if let Some(line) = lines.get(self.line - 1) {
-            let mut start_col = self.start
+            let start_col = self.start
                 - lines
                     .iter()
                     .take(self.line - 1)
                     .map(|s| s.len() + 1)
                     .sum::<usize>();
             let end_col = start_col + (self.end - self.start);
-            start_col = if start_col == 0 {
-                start_col
-            } else {
-                start_col - 1
-            };
 
             println!("{} | ", " ".repeat(self.line.to_string().len()));
             print!("{} | ", self.line.to_string().yellow());
             print!(
                 "{}",
-                line.chars().skip(0).take(start_col).collect::<String>()
+                line.chars()
+                    .skip(0)
+                    .take(start_col)
+                    .collect::<String>()
+                    .green()
             );
             print!(
                 "{}",
@@ -53,13 +52,14 @@ impl CodeError {
                     .skip(end_col)
                     .take(line.len() + 1)
                     .collect::<String>()
+                    .yellow()
             );
             print!("{} | ", " ".repeat(self.line.to_string().len()));
             print!("{}", " ".repeat(start_col));
-            for i in start_col..end_col {
+            for i in start_col..end_col + 1 {
                 print!(
                     "{}",
-                    (if i == start_col || i == end_col {
+                    (if i == start_col || i == end_col + 1 {
                         "^"
                     } else {
                         "~"
