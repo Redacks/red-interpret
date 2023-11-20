@@ -19,12 +19,17 @@ impl CodeError {
     pub fn print_error(&self, input: &String) {
         let lines: Vec<&str> = input.split("\n").collect();
         if let Some(line) = lines.get(self.line - 1) {
-            let start_col = self.start
-                - lines
-                    .iter()
-                    .take(self.line - 1)
-                    .map(|s| s.len() + 1)
-                    .sum::<usize>();
+            let lines_char_count = lines
+                .iter()
+                .take(self.line - 1)
+                .map(|s| s.chars().count() + 1)
+                .sum::<usize>();
+
+            let start_col = if self.start < lines_char_count {
+                self.start
+            } else {
+                self.start - lines_char_count
+            };
             let end_col = start_col + (self.end - self.start);
 
             println!("{} | ", " ".repeat(self.line.to_string().len()));
@@ -56,7 +61,7 @@ impl CodeError {
             );
             print!("{} | ", " ".repeat(self.line.to_string().len()));
             print!("{}", " ".repeat(start_col));
-            for i in start_col..end_col + 1 {
+            for i in start_col..end_col {
                 print!(
                     "{}",
                     (if i == start_col || i == end_col + 1 {

@@ -1,4 +1,8 @@
-Text textZahl = 10
-Zahl zahl = $textZahl$
-Output zahl
-Output zahl
+Text prompt = Bitte gib deinen Namen ein:
+Output prompt
+
+Text name = Anton
+
+Text halloName = Hallo $name$! Schön dich zu sehen!
+
+Output halloName

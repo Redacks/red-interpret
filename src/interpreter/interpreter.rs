@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, io::stdin};
 
 use crate::{
     error::CodeError,
@@ -29,13 +29,38 @@ impl Interpreter {
                 ExpressionTypes::NumberAssignment(var_expr, value) => {
                     self.assign_number(&expression, var_expr, value)?;
                 }
-                ExpressionTypes::InputStatement(_) => todo!(),
+                ExpressionTypes::InputStatement(var_expr) => {
+                    self.input(var_expr, &expression)?;
+                }
                 ExpressionTypes::OutputStatement(var_expr) => {
                     self.output(var_expr)?;
                 }
             }
         }
         Ok(())
+    }
+
+    pub fn input(
+        &mut self,
+        var_expr: &IdentifierExpression,
+        expr: &Expression,
+    ) -> Result<(), CodeError> {
+        let mut input_string = String::new();
+
+        if let Ok(_) = stdin().read_line(&mut input_string) {
+            self.set_var(
+                &var_expr.var_name,
+                RuntimeTypes::String(input_string.trim_end().to_string()),
+            );
+            Ok(())
+        } else {
+            Err(CodeError::new(
+                expr.line,
+                expr.start,
+                expr.end,
+                "Error while reading input!",
+            ))
+        }
     }
 
     pub fn output(&mut self, var_expr: &IdentifierExpression) -> Result<(), CodeError> {

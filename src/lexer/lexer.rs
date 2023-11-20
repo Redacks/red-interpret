@@ -42,7 +42,6 @@ impl Lexer {
                 '\n' => {
                     self.add_token(TokenType::NEWLINE);
                     self.line += 1;
-                    self.start = self.current;
                 }
                 ' ' => {
                     self.start = self.current;
@@ -227,7 +226,12 @@ impl Lexer {
     }
 
     fn add_token(&mut self, token_type: TokenType) {
-        let slice = &self.input[self.start..self.current];
+        let slice: String = self
+            .input
+            .chars()
+            .skip(self.start)
+            .take(self.current - self.start)
+            .collect();
         self.tokens.push(Token::new(
             self.line,
             self.start,
@@ -283,7 +287,12 @@ impl Lexer {
                 break;
             }
         }
-        let slice = &self.input[self.start..self.current - 1];
+        let slice: String = self
+            .input
+            .chars()
+            .skip(self.start)
+            .take(self.current - 1 - self.start)
+            .collect();
         Ok(slice.into())
     }
 
@@ -307,6 +316,6 @@ impl Lexer {
     }
 
     fn is_at_end(&self) -> bool {
-        self.current >= self.input.len()
+        self.current >= self.input.chars().count()
     }
 }
