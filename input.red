@@ -1,7 +1,7 @@
 Text prompt = Bitte gib deinen Namen ein:
 Output prompt
 
-Text name = Anton
+Input name
 
 Text halloName = Hallo $name$! Schön dich zu sehen!
 

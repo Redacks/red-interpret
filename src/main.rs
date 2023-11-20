@@ -34,7 +34,7 @@ fn main() {
         err.print_error(&file_content);
         exit(-1);
     });
-    println!("{:?}", lexed.clone());
+    //println!("{:?}", lexed.clone());
     task_stopwatch.stop("Lexing");
 
     task_stopwatch.start();
