@@ -2,85 +2,134 @@
   "scopeName": "source.red-lang",
   "patterns": [
     {
-      "include": "#mathOps"
-    },
-    {
-      "include": "#mathSymbols"
-    },
-    {
-      "include": "#identifiers"
-    },
-    {
-      "include": "#inline-identifiers"
-    },
-    {
-      "include": "#strings"
+      "include": "#instruction"
     }
   ],
   "repository": {
-    "identifiers": {
+    "instruction": {
       "patterns": [
         {
-          "match": "\\b(Input|Zahl|Output|Text)\\b\\s+(?:\\b([_a-zA-Z][_a-zA-Z0-9]{0,30})\\b)?",
-          "captures": {
+          "begin": "^\\b(Text)\\b",
+          "end": "(?=$)",
+          "beginCaptures": {
             "1": {
               "name": "keyword"
-            },
-            "2": {
+            }
+          },
+          "patterns": [
+            { "include": "#identifier" },
+            { "include": "#assignment" },
+            { "include": "#string" }
+          ]
+        },
+        {
+          "begin": "^\\b(Zahl)\\b",
+          "end": "(?=$)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword"
+            }
+          },
+          "patterns": [
+            { "include": "#identifier" },
+            { "include": "#assignment" },
+            { "include": "#number" }
+          ]
+        },
+        {
+          "begin": "^\\b(Output)\\b",
+          "end": "(?=$)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword"
+            }
+          },
+          "patterns": [{ "include": "#identifier" }]
+        },
+        {
+          "begin": "^\\b(Input)\\b",
+          "end": "(?=$)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword"
+            }
+          },
+          "patterns": [{ "include": "#identifier" }]
+        }
+      ]
+    },
+    "identifier": {
+      "patterns": [
+        {
+          "begin": "\\s+(?:\\b([_a-zA-Z][_a-zA-Z0-9]{0,30})\\b)",
+          "end": "(?=\\s*[\\n=])",
+          "captures": {
+            "1": {
               "name": "variable"
             }
           }
         }
       ]
     },
-    "mathOps": {
+    "number": {
       "patterns": [
         {
-          "match": "\\b(\\d+)\\b",
-          "name": "constant.numeric"
+          "begin": "\\s*(\\=)\\s*",
+          "captures": {
+            "1": { "name": "keyword" }
+          },
+          "end": "(?=$)",
+          "patterns": [
+            { "match": "(-?\\b\\d+\\b)", "name": "constant.numeric" },
+            { "include": "#mathSymbols" },
+            { "include": "#inlineIdentifier" }
+          ]
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "begin": "\\s*(\\=)\\s*",
+          "captures": {
+            "1": { "name": "keyword" }
+          },
+          "end": "(?=$)",
+          "patterns": [
+            {
+              "match": "\\s*([^\\s\\$\\n]*)\\s",
+              "name": "string"
+            },
+            { "include": "#inlineIdentifier" }
+          ]
         }
       ]
     },
     "mathSymbols": {
       "patterns": [
         {
-          "match": "\\s([=\\+\\-\\/\\*])\\s",
+          "match": "\\s+([=\\+\\-\\/\\*])\\s+",
           "captures": {
             "1": {
               "name": "keyword"
-            },
-            "2": {
-              "name": "string"
             }
           }
         }
       ]
     },
-    "strings": {
-      "patterns": [
-        {
-          "match": "\\s?([^\\s\\$]*)\\s?",
-          "name": "string"
+    "inlineIdentifier": {
+      "match": "(\\$)([_a-zA-Z][_a-zA-Z0-9]{0,30})(\\$)",
+      "captures": {
+        "1": {
+          "name": "keyword"
+        },
+        "2": {
+          "name": "variable"
+        },
+        "3": {
+          "name": "keyword"
         }
-      ]
-    },
-    "inline-identifiers": {
-      "patterns": [
-        {
-          "match": "([^\\s\\$]*)\\$([_a-zA-Z][_a-zA-Z0-9]{0,30})\\$([^\\s\\$]*)",
-          "captures": {
-            "1": {
-              "name": "string"
-            },
-            "2": {
-              "name": "variable"
-            },
-            "3": {
-              "name": "string"
-            }
-          }
-        }
-      ]
+      }
     }
   }
 }

@@ -14,7 +14,7 @@ mod stopwatch;
 
 fn main() {
     env::set_var("RUST_BACKTRACE", "full");
-    let mut task_stopwatch = StopWatch::new(false);
+    let mut task_stopwatch = StopWatch::new(true);
     let mut overall_stopwatch = StopWatch::new(true);
 
     overall_stopwatch.start();
