@@ -9,11 +9,11 @@
     "instruction": {
       "patterns": [
         {
-          "begin": "^\\b(Text)\\b",
+          "begin": "^\\s*\\b(Text)\\b",
           "end": "(?=$)",
           "beginCaptures": {
             "1": {
-              "name": "keyword"
+              "name": "support.type"
             }
           },
           "patterns": [
@@ -23,11 +23,11 @@
           ]
         },
         {
-          "begin": "^\\b(Zahl)\\b",
+          "begin": "^\\s*\\b(Zahl)\\b",
           "end": "(?=$)",
           "beginCaptures": {
             "1": {
-              "name": "keyword"
+              "name": "support.type"
             }
           },
           "patterns": [
@@ -37,7 +37,7 @@
           ]
         },
         {
-          "begin": "^\\b(Output)\\b",
+          "begin": "^\\s*\\b(Output)\\b",
           "end": "(?=$)",
           "beginCaptures": {
             "1": {
@@ -47,11 +47,21 @@
           "patterns": [{ "include": "#identifier" }]
         },
         {
-          "begin": "^\\b(Input)\\b",
+          "begin": "^\\s*\\b(Input)\\b",
           "end": "(?=$)",
           "beginCaptures": {
             "1": {
               "name": "keyword"
+            }
+          },
+          "patterns": [{ "include": "#identifier" }]
+        },
+        {
+          "begin": "^\\s*\\b(Wenn)\\b",
+          "end": "(?=$)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control"
             }
           },
           "patterns": [{ "include": "#identifier" }]
