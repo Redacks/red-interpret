@@ -1,0 +1,86 @@
+{
+  "scopeName": "source.red-lang",
+  "patterns": [
+    {
+      "include": "#mathOps"
+    },
+    {
+      "include": "#mathSymbols"
+    },
+    {
+      "include": "#identifiers"
+    },
+    {
+      "include": "#inline-identifiers"
+    },
+    {
+      "include": "#strings"
+    }
+  ],
+  "repository": {
+    "identifiers": {
+      "patterns": [
+        {
+          "match": "\\b(Input|Zahl|Output|Text)\\b\\s+(?:\\b([_a-zA-Z][_a-zA-Z0-9]{0,30})\\b)?",
+          "captures": {
+            "1": {
+              "name": "keyword"
+            },
+            "2": {
+              "name": "variable"
+            }
+          }
+        }
+      ]
+    },
+    "mathOps": {
+      "patterns": [
+        {
+          "match": "\\b(\\d+)\\b",
+          "name": "constant.numeric"
+        }
+      ]
+    },
+    "mathSymbols": {
+      "patterns": [
+        {
+          "match": "\\s([=\\+\\-\\/\\*])\\s",
+          "captures": {
+            "1": {
+              "name": "keyword"
+            },
+            "2": {
+              "name": "string"
+            }
+          }
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "match": "\\s?([^\\s\\$]*)\\s?",
+          "name": "string"
+        }
+      ]
+    },
+    "inline-identifiers": {
+      "patterns": [
+        {
+          "match": "([^\\s\\$]*)\\$([_a-zA-Z][_a-zA-Z0-9]{0,30})\\$([^\\s\\$]*)",
+          "captures": {
+            "1": {
+              "name": "string"
+            },
+            "2": {
+              "name": "variable"
+            },
+            "3": {
+              "name": "string"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -9,6 +9,10 @@ pub enum TokenType {
     IDENTIFIER,
     NEWLINE,
     EOF,
+    ADD,
+    SUB,
+    DIV,
+    MULT,
 }
 
 #[derive(Clone, Debug)]

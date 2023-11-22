@@ -84,7 +84,6 @@ name = "redlangv3"
 version = "0.1.3"
 dependencies = [
  "colored",
- "lazy_static",
  "regex",
 ]
 

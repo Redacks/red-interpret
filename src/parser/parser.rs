@@ -239,7 +239,127 @@ impl Parser {
         }
     }
 
-    fn try_get_number_value(&self) -> Result<NumberExpression, CodeError> {
-        NumberExpression::from_token(self.get_current_token()?)
+    fn is_math_operation(&mut self) -> Result<bool, CodeError> {
+        match self.get_current_token()?.token_type {
+            TokenType::ADD | TokenType::SUB | TokenType::MULT | TokenType::DIV => Ok(true),
+            _ => Ok(false),
+        }
+    }
+
+    fn try_get_math_operation(
+        &mut self,
+        prev_val: NumberExpression,
+    ) -> Result<NumberExpression, CodeError> {
+        match self.get_current_token()?.token_type {
+            TokenType::ADD => {
+                self.next_token();
+                let val1 = NumberExpression::from_token(self.get_current_token()?)?;
+                self.next_token();
+                if self.is_math_operation()? {
+                    let following_operation = self.try_get_math_operation(val1)?;
+                    Ok(NumberExpression::new(
+                        prev_val.line,
+                        prev_val.start,
+                        following_operation.end,
+                        NumberExpressionTypes::Add(
+                            Box::new(prev_val),
+                            Box::new(following_operation),
+                        ),
+                    ))
+                } else {
+                    Ok(NumberExpression::new(
+                        prev_val.line,
+                        prev_val.start,
+                        val1.end,
+                        NumberExpressionTypes::Add(Box::new(prev_val), Box::new(val1)),
+                    ))
+                }
+            }
+            TokenType::SUB => {
+                self.next_token();
+                let val1 = NumberExpression::from_token(self.get_current_token()?)?;
+                self.next_token();
+                if self.is_math_operation()? {
+                    let following_operation = self.try_get_math_operation(val1)?;
+                    Ok(NumberExpression::new(
+                        prev_val.line,
+                        prev_val.start,
+                        following_operation.end,
+                        NumberExpressionTypes::Sub(
+                            Box::new(prev_val),
+                            Box::new(following_operation),
+                        ),
+                    ))
+                } else {
+                    Ok(NumberExpression::new(
+                        prev_val.line,
+                        prev_val.start,
+                        val1.end,
+                        NumberExpressionTypes::Sub(Box::new(prev_val), Box::new(val1)),
+                    ))
+                }
+            }
+            TokenType::MULT => {
+                self.next_token();
+                let val1 = NumberExpression::from_token(self.get_current_token()?)?;
+                self.next_token();
+                if self.is_math_operation()? {
+                    let operation = NumberExpression::new(
+                        prev_val.line,
+                        prev_val.start,
+                        val1.end,
+                        NumberExpressionTypes::Mult(Box::new(prev_val), Box::new(val1)),
+                    );
+                    Ok(self.try_get_math_operation(operation)?)
+                } else {
+                    Ok(NumberExpression::new(
+                        prev_val.line,
+                        prev_val.start,
+                        val1.end,
+                        NumberExpressionTypes::Mult(Box::new(prev_val), Box::new(val1)),
+                    ))
+                }
+            }
+            TokenType::DIV => {
+                self.next_token();
+                let val1 = NumberExpression::from_token(self.get_current_token()?)?;
+                self.next_token();
+                if self.is_math_operation()? {
+                    let operation = NumberExpression::new(
+                        prev_val.line,
+                        prev_val.start,
+                        val1.end,
+                        NumberExpressionTypes::Div(Box::new(prev_val), Box::new(val1)),
+                    );
+                    Ok(self.try_get_math_operation(operation)?)
+                } else {
+                    Ok(NumberExpression::new(
+                        prev_val.line,
+                        prev_val.start,
+                        val1.end,
+                        NumberExpressionTypes::Div(Box::new(prev_val), Box::new(val1)),
+                    ))
+                }
+            }
+            _ => {
+                let current_token = self.get_current_token()?;
+                Err(CodeError::new(
+                    current_token.line,
+                    current_token.start,
+                    current_token.end,
+                    "Expected Math Operation",
+                ))
+            }
+        }
+    }
+
+    fn try_get_number_value(&mut self) -> Result<NumberExpression, CodeError> {
+        let val1 = NumberExpression::from_token(self.get_current_token()?)?;
+        self.next_token();
+        if self.is_math_operation()? {
+            Ok(self.try_get_math_operation(val1)?)
+        } else {
+            Ok(val1)
+        }
     }
 }

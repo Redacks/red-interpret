@@ -26,6 +26,10 @@ impl IdentifierExpression {
 pub enum NumberExpressionTypes {
     Value(i64),
     Identifier(IdentifierExpression),
+    Add(Box<NumberExpression>, Box<NumberExpression>),
+    Sub(Box<NumberExpression>, Box<NumberExpression>),
+    Mult(Box<NumberExpression>, Box<NumberExpression>),
+    Div(Box<NumberExpression>, Box<NumberExpression>),
 }
 
 #[derive(Debug, PartialEq)]

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io::stdin};
+use std::{collections::HashMap, io::stdin, num::Wrapping};
 
 use crate::{
     error::CodeError,
@@ -84,7 +84,7 @@ impl Interpreter {
     }
 
     pub fn get_var(
-        &mut self,
+        &self,
         expr: &IdentifierExpression,
         var_name: &String,
     ) -> Result<RuntimeTypes, CodeError> {
@@ -101,7 +101,7 @@ impl Interpreter {
     }
 
     pub fn eval_number_expression(
-        &mut self,
+        &self,
         expr: &Expression,
         n_expr: &NumberExpression,
     ) -> Result<i64, CodeError> {
@@ -123,6 +123,26 @@ impl Interpreter {
                     ))
                 }
             }
+            NumberExpressionTypes::Add(val1, val2) => {
+                Ok((Wrapping(self.eval_number_expression(expr, val1)?)
+                    + Wrapping(self.eval_number_expression(expr, val2)?))
+                .0)
+            }
+            NumberExpressionTypes::Sub(val1, val2) => {
+                Ok((Wrapping(self.eval_number_expression(expr, val1)?)
+                    - Wrapping(self.eval_number_expression(expr, val2)?))
+                .0)
+            }
+            NumberExpressionTypes::Mult(val1, val2) => {
+                Ok((Wrapping(self.eval_number_expression(expr, val1)?)
+                    * Wrapping(self.eval_number_expression(expr, val2)?))
+                .0)
+            }
+            NumberExpressionTypes::Div(val1, val2) => {
+                Ok((Wrapping(self.eval_number_expression(expr, val1)?)
+                    / Wrapping(self.eval_number_expression(expr, val2)?))
+                .0)
+            }
         }
     }
 
@@ -133,19 +153,15 @@ impl Interpreter {
     ) -> Result<String, CodeError> {
         match t_expr.get_expression() {
             TextExpressionTypes::Concat(expr1, expr2) => {
-                if expr1.get_expression().is_identifier() || expr2.get_expression().is_identifier()
+                let eval_expr1 = self.eval_string_expression(expr, expr1)?;
+                let eval_expr2 = self.eval_string_expression(expr, expr2)?;
+                if expr1.get_expression().is_identifier()
+                    || expr2.get_expression().is_identifier()
+                    || eval_expr1.ends_with("$")
                 {
-                    Ok(format!(
-                        "{}{}",
-                        self.eval_string_expression(expr, expr1)?,
-                        self.eval_string_expression(expr, expr2)?
-                    ))
+                    Ok(format!("{}{}", eval_expr1, eval_expr2))
                 } else {
-                    Ok(format!(
-                        "{} {}",
-                        self.eval_string_expression(expr, expr1)?,
-                        self.eval_string_expression(expr, expr2)?
-                    ))
+                    Ok(format!("{} {}", eval_expr1, eval_expr2))
                 }
             }
             TextExpressionTypes::Value(value) => Ok(value.to_owned()),

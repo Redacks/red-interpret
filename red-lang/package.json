@@ -1,0 +1,25 @@
+{
+  "name": "red-lang",
+  "displayName": "Red-Lang",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "red-lang",
+      "aliases": ["Red", "red-lang"],
+      "extensions": [".red"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "red-lang",
+      "scopeName": "source.red-lang",
+      "path": "./syntaxes/red-highlight.tmLanguage.json"
+    }]
+  }
+}

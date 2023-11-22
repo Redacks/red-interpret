@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+      "*.red": "red-highlight"
+    },
+    "editor.tokenColorCustomizations": {
+      "textMateRules": [
+        {
+          "scope": [
+            "keyword.red-highlight",
+            "identifier.red-highlight",
+            "number.red-highlight",
+            "mathOp.red-highlight",
+            "rawText.red-highlight"
+          ],
+          "settings": {
+          }
+        }
+      ]
+    }
+  }
+  
