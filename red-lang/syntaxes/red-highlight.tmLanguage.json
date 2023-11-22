@@ -108,7 +108,7 @@
     "mathSymbols": {
       "patterns": [
         {
-          "match": "\\s+([=\\+\\-\\/\\*])\\s+",
+          "match": "([=\\+\\-\\/\\*])",
           "captures": {
             "1": {
               "name": "keyword"
